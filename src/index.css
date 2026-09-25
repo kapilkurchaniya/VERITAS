@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #faf9f7; /* warm off-white */
+    --foreground: #111827;
+    --card: #ffffff;
+    --card-foreground: #111827;
+    --sidebar: #f4f3f0;
+    
+    --primary: #0f766e; /* teal */
+    --primary-hover: #0d9488;
+    --primary-foreground: #ffffff;
+    
+    --muted: #f3f4f6;
+    --muted-foreground: #6b7280;
+    
+    --border: #e5e7eb;
+    --input: #e5e7eb;
+    --ring: #0f766e;
+    
+    --destructive: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+  }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Custom button styles */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md font-medium transition-colors px-4 py-2 text-sm cursor-pointer border-none;
+  }
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary-hover;
+  }
+  .btn-outline {
+    @apply border border-primary text-primary bg-transparent hover:bg-primary hover:text-white;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-foreground hover:bg-muted;
+  }
+  
+  /* inputs */
+  .input {
+    @apply flex h-9 w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none transition-colors focus:border-primary;
+  }
+}
