@@ -12,10 +12,26 @@ import {
   Bell, 
   Download,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  LogOut
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function ReviewQueueScreen() {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('review-queue');
+
+  const tabs = [
+    { id: 'dashboard', name: 'Dashboard', icon: LayoutDashboard },
+    { id: 'review-queue', name: 'Review Queue', icon: ClipboardCheck },
+    { id: 'schedule', name: 'Schedule', icon: CalendarDays },
+    { id: 'variance', name: 'Variance', icon: ChartNoAxesCombined },
+    { id: 'risks', name: 'Risks & Alerts', icon: TriangleAlert },
+    { id: 'memory', name: 'Project Memory', icon: BrainCircuit },
+    { id: 'audit', name: 'Audit Trail', icon: History },
+  ];
+
   return (
     <div className="min-h-screen bg-background font-['IBM_Plex_Sans'] text-foreground">
       {/* Sidebar Shell */}
@@ -40,34 +56,24 @@ export default function ReviewQueueScreen() {
         </div>
 
         <nav className="flex-1 space-y-1 p-4" aria-label="Primary navigation">
-          <a href="#" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-all">
-            <LayoutDashboard className="h-4 w-4 shrink-0" />
-            <span>Dashboard</span>
-          </a>
-          <a href="#" className="flex items-center gap-3 rounded-md bg-white border border-border px-3 py-2.5 text-sm font-medium text-primary shadow-sm">
-            <ClipboardCheck className="h-4 w-4 shrink-0" />
-            <span>Review Queue</span>
-          </a>
-          <a href="#" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-all">
-            <CalendarDays className="h-4 w-4 shrink-0" />
-            <span>Schedule</span>
-          </a>
-          <a href="#" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-all">
-            <ChartNoAxesCombined className="h-4 w-4 shrink-0" />
-            <span>Variance</span>
-          </a>
-          <a href="#" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-all">
-            <TriangleAlert className="h-4 w-4 shrink-0" />
-            <span>Risks & Alerts</span>
-          </a>
-          <a href="#" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-all">
-            <BrainCircuit className="h-4 w-4 shrink-0" />
-            <span>Project Memory</span>
-          </a>
-          <a href="#" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted transition-all">
-            <History className="h-4 w-4 shrink-0" />
-            <span>Audit Trail</span>
-          </a>
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-all ${
+                  isActive 
+                    ? 'bg-white border border-border text-primary shadow-sm' 
+                    : 'text-muted-foreground hover:bg-muted border border-transparent'
+                }`}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span>{tab.name}</span>
+              </button>
+            );
+          })}
         </nav>
       </aside>
 
@@ -77,6 +83,8 @@ export default function ReviewQueueScreen() {
           <span className="text-muted-foreground">Project</span>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
           <span className="truncate font-medium text-foreground">Northline Civic Center</span>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          <span className="truncate font-medium text-foreground">{tabs.find(t => t.id === activeTab)?.name}</span>
         </div>
 
         <div className="flex items-center gap-5">
@@ -97,6 +105,13 @@ export default function ReviewQueueScreen() {
             </span>
             <ChevronDown className="h-4 w-4 text-muted-foreground" />
           </button>
+          <button 
+            onClick={() => navigate('/login')}
+            className="flex items-center gap-2 border-l border-border pl-5 text-muted-foreground hover:text-foreground transition-colors"
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
         </div>
       </header>
 
@@ -104,146 +119,171 @@ export default function ReviewQueueScreen() {
       <main className="ml-[236px] pt-16 min-h-screen">
         <div className="mx-auto max-w-[1140px] px-8 py-8">
           
-          {/* Page Intro Row */}
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground">Review queue</h1>
-              <p className="mt-2 text-sm text-muted-foreground">18 field submissions require validation</p>
+          {activeTab === 'review-queue' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* Page Intro Row */}
+              <div className="flex items-end justify-between mb-8">
+                <div>
+                  <h1 className="text-3xl font-semibold tracking-tight text-foreground">Review queue</h1>
+                  <p className="mt-2 text-sm text-muted-foreground">18 field submissions require validation</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <button className="btn btn-outline shadow-sm text-sm font-medium px-4 py-2 border-primary text-primary hover:bg-primary hover:text-white rounded-md transition-all">
+                    Saved views
+                  </button>
+                  <span className="text-xs text-muted-foreground">Last updated 2 min ago</span>
+                </div>
+              </div>
+
+              {/* KPI Cards */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Awaiting review</p>
+                  <p className="text-2xl font-semibold mt-2">18</p>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">High confidence</p>
+                  <p className="text-2xl font-semibold text-primary mt-2">6</p>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Needs correction</p>
+                  <p className="text-2xl font-semibold text-destructive mt-2">4</p>
+                </div>
+                <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Due today</p>
+                  <p className="text-2xl font-semibold mt-2">2</p>
+                </div>
+              </div>
+
+              {/* Filters & Segmented Control */}
+              <div className="flex items-end gap-4 mb-6 pb-6 border-b border-border flex-wrap">
+                <div className="flex flex-col gap-2 min-w-[140px]">
+                  <span className="text-xs font-medium text-muted-foreground">Location</span>
+                  <select className="input cursor-pointer">
+                    <option value="all">All locations</option>
+                    <option value="level2">Level 2 east wing</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2 min-w-[140px]">
+                  <span className="text-xs font-medium text-muted-foreground">Discipline</span>
+                  <select className="input cursor-pointer">
+                    <option value="all">All disciplines</option>
+                    <option value="structural">Structural</option>
+                    <option value="civil">Civil</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2 min-w-[140px]">
+                  <span className="text-xs font-medium text-muted-foreground">Status</span>
+                  <select className="input cursor-pointer">
+                    <option value="any">Any status</option>
+                    <option value="pending">Pending</option>
+                    <option value="verified">Verified</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2 min-w-[172px]">
+                  <span className="text-xs font-medium text-muted-foreground">Date range</span>
+                  <select className="input cursor-pointer">
+                    <option value="jun10-18">Jun 10 to Jun 18</option>
+                  </select>
+                </div>
+                
+                <button className="btn btn-primary ml-auto shadow-sm gap-2">
+                  <Download className="w-4 h-4" />
+                  Export queue
+                </button>
+              </div>
+
+              {/* Segmented Control */}
+              <div className="flex items-center gap-1 bg-muted p-1 rounded-md w-fit mb-4">
+                <button className="px-3 py-1.5 text-sm font-medium bg-card shadow-sm rounded text-foreground">
+                  All submissions 18
+                </button>
+                <button className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all">
+                  Pending 12
+                </button>
+                <button className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all">
+                  Reviewed 6
+                </button>
+              </div>
+
+              {/* Table */}
+              <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left border-collapse">
+                    <thead className="bg-muted text-muted-foreground font-medium border-b border-border">
+                      <tr>
+                        <th className="px-4 py-3 font-medium">Submission</th>
+                        <th className="px-4 py-3 font-medium">Field input</th>
+                        <th className="px-4 py-3 font-medium">Activity match</th>
+                        <th className="px-4 py-3 font-medium">Confidence</th>
+                        <th className="px-4 py-3 font-medium">Submitted</th>
+                        <th className="px-4 py-3 font-medium">Status</th>
+                        <th className="px-4 py-3 font-medium">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {[
+                        { id: 'SUB-1048', loc: 'Level 2 east wing', input: 'Rebar cage tied and inspected', match: 'L2 structural steel', conf: '94%', date: 'Jun 18, 09:42', status: 'Pending', confColor: 'text-primary', confBg: 'bg-primary/10' },
+                        { id: 'SUB-1047', loc: 'Level 2 slab', input: 'Concrete pour sequence started', match: 'L2 slab pour', conf: '88%', date: 'Jun 18, 08:15', status: 'Verified', confColor: 'text-success', confBg: 'bg-green-100' },
+                        { id: 'SUB-1046', loc: 'Utility trench', input: 'Trenching complete', match: 'Site works - trenching', conf: '92%', date: 'Jun 17, 16:30', status: 'Pending', confColor: 'text-primary', confBg: 'bg-primary/10' },
+                        { id: 'SUB-1045', loc: 'North facade', input: 'Scaffolding issues', match: 'Facade access setup', conf: '45%', date: 'Jun 17, 14:10', status: 'Pending', confColor: 'text-warning', confBg: 'bg-yellow-100', icon: <AlertCircle className="w-3 h-3 text-warning inline-block mr-1"/> },
+                        { id: 'SUB-1044', loc: 'Loading dock', input: 'Materials received', match: 'Delivery - steel', conf: '96%', date: 'Jun 17, 11:20', status: 'Verified', confColor: 'text-success', confBg: 'bg-green-100' },
+                      ].map((row, i) => (
+                        <tr key={i} className="hover:bg-muted/50 transition-colors cursor-pointer group">
+                          <td className="px-4 py-3 align-top">
+                            <a href="#" className="text-primary font-medium group-hover:underline">{row.id}</a>
+                            <span className="block mt-1 text-xs text-muted-foreground">{row.loc}</span>
+                          </td>
+                          <td className="px-4 py-3 align-top max-w-[200px] truncate">{row.input}</td>
+                          <td className="px-4 py-3 align-top font-medium">{row.match}</td>
+                          <td className="px-4 py-3 align-top">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.confBg} ${row.confColor}`}>
+                              {row.icon}
+                              {row.conf}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 align-top text-xs text-muted-foreground whitespace-nowrap">{row.date}</td>
+                          <td className="px-4 py-3 align-top">
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.status === 'Verified' ? 'bg-[#dcfce7] text-[#008236]' : 'bg-[#ffedd5] text-[#c2410c]'}`}>
+                              {row.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 align-top">
+                            <a href="#" className="text-primary font-medium hover:underline text-sm">Review</a>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Footer note */}
+                <div className="bg-background/50 border-t border-border px-4 py-3 text-xs text-muted-foreground flex justify-between items-center">
+                  <span>Showing 5 of 18 submissions · Sorted by newest</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <button className="btn btn-outline shadow-sm text-sm font-medium px-4 py-2 border-primary text-primary hover:bg-primary hover:text-white rounded-md transition-all">
-                Saved views
+          )}
+
+          {activeTab !== 'review-queue' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col items-center justify-center h-[60vh] text-center max-w-md mx-auto">
+              <div className="w-20 h-20 bg-primary/10 text-primary rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-primary/20">
+                {tabs.find(t => t.id === activeTab)?.icon && (() => {
+                  const Icon = tabs.find(t => t.id === activeTab)!.icon;
+                  return <Icon className="w-10 h-10" />;
+                })()}
+              </div>
+              <h2 className="text-2xl font-semibold mb-2">{tabs.find(t => t.id === activeTab)?.name}</h2>
+              <p className="text-muted-foreground mb-8 leading-relaxed">
+                This module is currently in development. Soon you'll be able to manage your {tabs.find(t => t.id === activeTab)?.name.toLowerCase()} workflows here with our advanced analytics and AI-driven insights.
+              </p>
+              <button 
+                onClick={() => setActiveTab('review-queue')}
+                className="btn btn-outline px-6 rounded-full"
+              >
+                Back to Review Queue
               </button>
-              <span className="text-xs text-muted-foreground">Last updated 2 min ago</span>
             </div>
-          </div>
-
-          {/* KPI Cards */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Awaiting review</p>
-              <p className="text-2xl font-semibold mt-2">18</p>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">High confidence</p>
-              <p className="text-2xl font-semibold text-primary mt-2">6</p>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Needs correction</p>
-              <p className="text-2xl font-semibold text-destructive mt-2">4</p>
-            </div>
-            <div className="bg-card border border-border rounded-lg p-4 shadow-sm flex flex-col justify-between">
-              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Due today</p>
-              <p className="text-2xl font-semibold mt-2">2</p>
-            </div>
-          </div>
-
-          {/* Filters & Segmented Control */}
-          <div className="flex items-end gap-4 mb-6 pb-6 border-b border-border flex-wrap">
-            <div className="flex flex-col gap-2 min-w-[140px]">
-              <span className="text-xs font-medium text-muted-foreground">Location</span>
-              <select className="input cursor-pointer">
-                <option value="all">All locations</option>
-                <option value="level2">Level 2 east wing</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-2 min-w-[140px]">
-              <span className="text-xs font-medium text-muted-foreground">Discipline</span>
-              <select className="input cursor-pointer">
-                <option value="all">All disciplines</option>
-                <option value="structural">Structural</option>
-                <option value="civil">Civil</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-2 min-w-[140px]">
-              <span className="text-xs font-medium text-muted-foreground">Status</span>
-              <select className="input cursor-pointer">
-                <option value="any">Any status</option>
-                <option value="pending">Pending</option>
-                <option value="verified">Verified</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-2 min-w-[172px]">
-              <span className="text-xs font-medium text-muted-foreground">Date range</span>
-              <select className="input cursor-pointer">
-                <option value="jun10-18">Jun 10 to Jun 18</option>
-              </select>
-            </div>
-            
-            <button className="btn btn-primary ml-auto shadow-sm gap-2">
-              <Download className="w-4 h-4" />
-              Export queue
-            </button>
-          </div>
-
-          {/* Segmented Control */}
-          <div className="flex items-center gap-1 bg-muted p-1 rounded-md w-fit mb-4">
-            <button className="px-3 py-1.5 text-sm font-medium bg-card shadow-sm rounded text-foreground">
-              All submissions 18
-            </button>
-            <button className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all">
-              Pending 12
-            </button>
-            <button className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-all">
-              Reviewed 6
-            </button>
-          </div>
-
-          {/* Table */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left border-collapse">
-                <thead className="bg-muted text-muted-foreground font-medium border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">Submission</th>
-                    <th className="px-4 py-3 font-medium">Field input</th>
-                    <th className="px-4 py-3 font-medium">Activity match</th>
-                    <th className="px-4 py-3 font-medium">Confidence</th>
-                    <th className="px-4 py-3 font-medium">Submitted</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {[
-                    { id: 'SUB-1048', loc: 'Level 2 east wing', input: 'Rebar cage tied and inspected', match: 'L2 structural steel', conf: '94%', date: 'Jun 18, 09:42', status: 'Pending', confColor: 'text-primary', confBg: 'bg-primary/10' },
-                    { id: 'SUB-1047', loc: 'Level 2 slab', input: 'Concrete pour sequence started', match: 'L2 slab pour', conf: '88%', date: 'Jun 18, 08:15', status: 'Verified', confColor: 'text-success', confBg: 'bg-green-100' },
-                    { id: 'SUB-1046', loc: 'Utility trench', input: 'Trenching complete', match: 'Site works - trenching', conf: '92%', date: 'Jun 17, 16:30', status: 'Pending', confColor: 'text-primary', confBg: 'bg-primary/10' },
-                    { id: 'SUB-1045', loc: 'North facade', input: 'Scaffolding issues', match: 'Facade access setup', conf: '45%', date: 'Jun 17, 14:10', status: 'Pending', confColor: 'text-warning', confBg: 'bg-yellow-100', icon: <AlertCircle className="w-3 h-3 text-warning inline-block mr-1"/> },
-                    { id: 'SUB-1044', loc: 'Loading dock', input: 'Materials received', match: 'Delivery - steel', conf: '96%', date: 'Jun 17, 11:20', status: 'Verified', confColor: 'text-success', confBg: 'bg-green-100' },
-                  ].map((row, i) => (
-                    <tr key={i} className="hover:bg-muted/50 transition-colors cursor-pointer group">
-                      <td className="px-4 py-3 align-top">
-                        <a href="#" className="text-primary font-medium group-hover:underline">{row.id}</a>
-                        <span className="block mt-1 text-xs text-muted-foreground">{row.loc}</span>
-                      </td>
-                      <td className="px-4 py-3 align-top max-w-[200px] truncate">{row.input}</td>
-                      <td className="px-4 py-3 align-top font-medium">{row.match}</td>
-                      <td className="px-4 py-3 align-top">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.confBg} ${row.confColor}`}>
-                          {row.icon}
-                          {row.conf}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 align-top text-xs text-muted-foreground whitespace-nowrap">{row.date}</td>
-                      <td className="px-4 py-3 align-top">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${row.status === 'Verified' ? 'bg-[#dcfce7] text-[#008236]' : 'bg-[#ffedd5] text-[#c2410c]'}`}>
-                          {row.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 align-top">
-                        <a href="#" className="text-primary font-medium hover:underline text-sm">Review</a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {/* Footer note */}
-            <div className="bg-background/50 border-t border-border px-4 py-3 text-xs text-muted-foreground flex justify-between items-center">
-              <span>Showing 5 of 18 submissions · Sorted by newest</span>
-            </div>
-          </div>
+          )}
 
         </div>
       </main>
