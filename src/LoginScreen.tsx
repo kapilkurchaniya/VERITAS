@@ -1,6 +1,20 @@
-import { CheckCircle2, ShieldCheck, ChevronDown } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, ChevronDown, UserSquare2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function LoginScreen() {
+  const navigate = useNavigate();
+  const [role, setRole] = useState<'reviewer' | 'field-agent'>('reviewer');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (role === 'reviewer') {
+      navigate('/dashboard/reviewer');
+    } else {
+      navigate('/dashboard/field-agent');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background font-['IBM_Plex_Sans'] text-foreground flex flex-col items-center justify-center p-8">
       <div className="w-[420px] flex flex-col gap-6">
@@ -24,7 +38,7 @@ export default function LoginScreen() {
           </div>
 
           {/* Form Content */}
-          <div className="p-8 flex flex-col gap-5">
+          <form onSubmit={handleLogin} className="p-8 flex flex-col gap-5">
             
             {/* Project Selector */}
             <div className="flex flex-col gap-2">
@@ -38,14 +52,34 @@ export default function LoginScreen() {
               </div>
             </div>
 
+            {/* Role Demo Selector */}
+            <div className="flex flex-col gap-2">
+              <label htmlFor="role" className="text-sm font-medium text-foreground flex items-center gap-2">
+                <UserSquare2 className="w-4 h-4" /> Sign in as (Demo Role)
+              </label>
+              <div className="relative">
+                <select 
+                  id="role" 
+                  value={role}
+                  onChange={(e) => setRole(e.target.value as 'reviewer' | 'field-agent')}
+                  className="input cursor-pointer appearance-none pr-10 border-primary/30 focus:border-primary bg-primary/5"
+                >
+                  <option value="reviewer">Reviewer / QA Manager</option>
+                  <option value="field-agent">Field Agent</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+
             {/* Email */}
             <div className="flex flex-col gap-2">
               <label htmlFor="email" className="text-sm font-medium text-foreground">Work email</label>
               <input 
                 id="email" 
                 type="email" 
-                defaultValue="maya.chen@northlinebuild.com" 
+                defaultValue={role === 'reviewer' ? "maya.chen@northlinebuild.com" : "john.field@northlinebuild.com"} 
                 className="input" 
+                key={role} // Re-render default value when role changes
               />
             </div>
 
@@ -75,7 +109,7 @@ export default function LoginScreen() {
 
             {/* Actions */}
             <div className="flex flex-col gap-3 mt-2">
-              <button className="btn btn-primary w-full shadow-sm text-sm py-2.5">
+              <button type="submit" className="btn btn-primary w-full shadow-sm text-sm py-2.5">
                 Sign in
               </button>
               
@@ -89,7 +123,7 @@ export default function LoginScreen() {
               </div>
             </div>
             
-          </div>
+          </form>
 
           {/* Security Strip */}
           <div className="bg-background/50 border-t border-border px-6 py-4 flex items-center justify-center gap-3">
