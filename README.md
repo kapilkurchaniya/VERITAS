@@ -1,32 +1,77 @@
-# React + TypeScript + Vite
+# NEXUS — Project Execution Intelligence Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+AI-powered platform that transforms unstructured field updates into validated, traceable, schedule-linked project actuals.
 
-Currently, two official plugins are available:
+## Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### Prerequisites
+- Docker Desktop (for PostgreSQL)
+- Node.js 20+
+- Python 3.11+
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+### 1. Start Database
+```bash
+docker-compose up -d
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### 2. Set up Backend
+```bash
+cd apps/api
+python -m venv venv
+
+# Windows
+.\venv\Scripts\activate
+
+# Mac/Linux
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### 3. Run Migrations & Seed
+```bash
+cd apps/api
+alembic upgrade head
+python -m app.seed
+```
+
+### 4. Start Backend
+```bash
+cd apps/api
+.\venv\Scripts\uvicorn app.main:app --reload --port 8000
+```
+API docs available at: http://localhost:8000/docs
+
+### 5. Start Frontend
+```bash
+cd apps/web
+npm run dev
+```
+Frontend available at: http://localhost:3000
+
+## Dev Credentials
+
+| Email | Password | Role |
+|---|---|---|
+| admin@nexus.dev | admin123 | ADMIN |
+| pm@nexus.dev | pm123 | PROJECT_MANAGER |
+| planner@nexus.dev | planner123 | PLANNER |
+| supervisor@nexus.dev | supervisor123 | SUPERVISOR |
+| auditor@nexus.dev | auditor123 | AUDITOR |
+
+## Architecture
+
+```
+apps/
+├── web/     → Next.js App Router (frontend)
+└── api/     → FastAPI + SQLAlchemy (backend)
+```
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js, React, TypeScript, Tailwind CSS |
+| Backend | Python, FastAPI, Pydantic, SQLAlchemy |
+| Database | PostgreSQL + pgvector |
+| Auth | JWT + bcrypt |
