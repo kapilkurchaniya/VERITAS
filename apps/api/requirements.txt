@@ -24,6 +24,10 @@ email-validator==2.2.0
 httpx==0.28.1
 structlog==25.4.0
 
+# ── AI Providers ───────────────────────────────────────
+openai==1.55.0
+pdfplumber==0.11.4
+
 # ── Testing ────────────────────────────────────────────
 pytest==8.4.0
 pytest-asyncio==1.0.0
