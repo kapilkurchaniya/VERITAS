@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.db.session import get_db
-from app.core.security import require_roles
+from app.core.deps import require_roles
 from app.models.user import User, RoleName
 from app.models.execution import ExecutionEvent, Evidence, SourceType, EventStatus
 from app.schemas.execution import ExecutionEventResponse, EvidenceResponse
@@ -86,3 +86,18 @@ async def upload_evidence(
     await db.commit()
     await db.refresh(evidence)
     return evidence
+
+from fastapi import BackgroundTasks
+from app.services.pipeline import PipelineOrchestrator
+
+@router.post("/{event_id}/process")
+async def process_event(
+    event_id: uuid.UUID,
+    background_tasks: BackgroundTasks,
+    current_user: User = Depends(require_roles([RoleName.SUPERVISOR, RoleName.ADMIN, RoleName.PLANNER])),
+    db: AsyncSession = Depends(get_db)
+):
+    """Trigger the AI extraction pipeline for an event."""
+    orchestrator = PipelineOrchestrator()
+    background_tasks.add_task(orchestrator.process_event_background, event_id)
+    return {"message": "Processing started", "event_id": str(event_id)}

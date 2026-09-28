@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.db.session import get_db
-from app.core.security import require_roles
+from app.core.deps import require_roles
 from app.models.user import User, RoleName
 from app.models.execution import ExecutionEvent, EventStatus
 from app.schemas.execution import ExecutionEventResponse
