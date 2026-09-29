@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from app.db.session import get_db
-from app.core.security import require_roles
+from app.core.deps import require_roles
 from app.models.user import User, RoleName
 from app.models.schedule import Activity, ActivityDependency
 from app.schemas.schedule import ActivityResponse, ActivityDependencyResponse

@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.db.session import get_db
-from app.core.security import require_roles
+from app.core.deps import require_roles
 from app.models.user import User, RoleName
 from app.models.schedule import Schedule, ScheduleVersion
 from app.schemas.schedule import ScheduleResponse, ScheduleVersionResponse
@@ -13,8 +13,12 @@ from app.services.schedule_service import ScheduleService
 
 router = APIRouter(prefix="/schedules", tags=["Schedules"])
 
+from fastapi import BackgroundTasks
+from app.services.matching import MatchEngine
+
 @router.post("/import", response_model=ScheduleVersionResponse)
 async def import_schedule(
+    background_tasks: BackgroundTasks,
     project_id: uuid.UUID = Form(...),
     file: UploadFile = File(...),
     current_user: User = Depends(require_roles([RoleName.ADMIN, RoleName.PLANNER])),
@@ -33,6 +37,11 @@ async def import_schedule(
         file=file,
         user_id=current_user.id
     )
+    
+    # Trigger vector embedding generation for semantic search
+    matcher = MatchEngine()
+    background_tasks.add_task(matcher.compute_embeddings_background, version.id)
+    
     return version
 
 @router.get("/project/{project_id}", response_model=List[ScheduleResponse])

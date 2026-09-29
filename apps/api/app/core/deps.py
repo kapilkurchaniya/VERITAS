@@ -44,7 +44,7 @@ async def get_current_user(
     return user
 
 
-def require_roles(*allowed_roles: str):
+def require_roles(*allowed_roles):
     """
     Factory that returns a dependency checking if the current user
     has at least one of the allowed roles.
@@ -52,14 +52,23 @@ def require_roles(*allowed_roles: str):
     Usage:
         @router.get("/admin", dependencies=[Depends(require_roles("ADMIN"))])
     """
+    roles = []
+    for r in allowed_roles:
+        if isinstance(r, (list, tuple)):
+            roles.extend(r)
+        else:
+            roles.append(r)
+            
+    string_roles = [r.value if hasattr(r, 'value') else r for r in roles]
+
     async def role_checker(
         current_user: Annotated[User, Depends(get_current_user)],
     ) -> User:
         user_role_names = {r.name.value if hasattr(r.name, 'value') else r.name for r in current_user.roles}
-        if not user_role_names.intersection(set(allowed_roles)):
+        if not user_role_names.intersection(set(string_roles)):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Requires one of: {', '.join(allowed_roles)}",
+                detail=f"Requires one of: {', '.join(string_roles)}",
             )
         return current_user
     return role_checker
