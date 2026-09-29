@@ -4,3 +4,4 @@ from app.models.project import Project, ProjectMember, ProjectStatus  # noqa: F4
 from app.models.audit import AuditLog  # noqa: F401
 from app.models.schedule import Schedule, ScheduleVersion, Activity, ActivityDependency  # noqa: F401
 from app.models.execution import ExecutionEvent, Evidence, EventEvidence  # noqa: F401
+from app.models.variance import Variance  # noqa: F401
