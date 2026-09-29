@@ -1,9 +1,10 @@
-export default function ProjectOverviewPage({ params }: { params: { id: string } }) {
+export default async function ProjectOverviewPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold tracking-tight">Project Overview</h2>
       <p className="text-white/60">
-        Project ID: {params.id}
+        Project ID: {id}
       </p>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {/* Placeholder cards */}
