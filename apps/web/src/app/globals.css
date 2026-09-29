@@ -1,90 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@source "../../";
 
-:root {
-  /* ── Neutral palette (dark enterprise command-center) ── */
-  --bg-primary: #0a0e17;
-  --bg-secondary: #111827;
-  --bg-tertiary: #1a2236;
-  --bg-surface: #1e293b;
-  --bg-elevated: #243044;
+@theme {
+  --font-sans: 'IBM Plex Sans', sans-serif;
 
-  /* ── Text ── */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #0a0e17;
-
-  /* ── Accent (restrained teal) ── */
-  --accent: #14b8a6;
-  --accent-hover: #2dd4bf;
-  --accent-muted: rgba(20, 184, 166, 0.12);
-  --accent-border: rgba(20, 184, 166, 0.25);
-
-  /* ── Severity ── */
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --info: #3b82f6;
-
-  /* ── Borders ── */
-  --border: #1e293b;
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.12);
-
-  /* ── Spacing ── */
-  --radius: 8px;
-  --radius-sm: 6px;
-  --radius-lg: 12px;
-
-  /* ── Sidebar ── */
-  --sidebar-width: 260px;
-  --topbar-height: 56px;
+  --color-background: #faf9f7;
+  --color-foreground: #111827;
+  --color-card: #ffffff;
+  --color-card-foreground: #111827;
+  --color-sidebar: #f4f3f0;
+  
+  --color-primary: #0f766e;
+  --color-primary-hover: #0d9488;
+  --color-primary-foreground: #ffffff;
+  
+  --color-muted: #f3f4f6;
+  --color-muted-foreground: #6b7280;
+  
+  --color-border: #e5e7eb;
+  --color-input: #e5e7eb;
+  --color-ring: #0f766e;
+  
+  --color-destructive: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #10b981;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    -webkit-font-smoothing: antialiased;
+  }
 }
 
-html {
-  color-scheme: dark;
-}
-
-body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
-}
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
-
-/* ── Focus ring ── */
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* ── Selection ── */
-::selection {
-  background: var(--accent-muted);
-  color: var(--text-primary);
+@layer components {
+  /* Custom button styles */
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md font-medium transition-colors px-4 py-2 text-sm cursor-pointer border-none;
+  }
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary-hover;
+  }
+  .btn-outline {
+    @apply border border-primary text-primary bg-transparent hover:bg-primary hover:text-white;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-foreground hover:bg-muted;
+  }
+  
+  /* inputs */
+  .input {
+    @apply flex h-9 w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none transition-colors focus:border-primary;
+  }
 }

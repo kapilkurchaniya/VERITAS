@@ -9,6 +9,7 @@ from app.api.v1.activities import router as activities_router
 
 from app.api.v1.capture import router as capture_router
 from app.api.v1.events import router as events_router
+from app.api.v1.governance import router as governance_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 api_v1_router.include_router(auth_router)
@@ -18,3 +19,4 @@ api_v1_router.include_router(schedules_router)
 api_v1_router.include_router(activities_router)
 api_v1_router.include_router(capture_router)
 api_v1_router.include_router(events_router)
+api_v1_router.include_router(governance_router)
