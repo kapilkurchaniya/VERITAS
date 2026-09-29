@@ -50,6 +50,7 @@ class ExecutionEvent(Base):
     
     # Relationships
     evidence: Mapped[List["Evidence"]] = relationship("Evidence", secondary="event_evidence", back_populates="events")
+    matched_activity = relationship("Activity", foreign_keys=[matched_activity_id])
 
 class Evidence(Base):
     __tablename__ = "evidence"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Mic, Image as ImageIcon, Send, Loader2, StopCircle, UploadCloud, X, CheckCircle2 } from "lucide-react";
+import { Mic, Image as ImageIcon, Send, Loader2, StopCircle, UploadCloud, X, CheckCircle2, ShieldAlert } from "lucide-react";
 import { api } from "@/lib/api";
 
 export default function CapturePage() {
@@ -16,6 +16,7 @@ export default function CapturePage() {
   
   const [submitting, setSubmitting] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState<"IDLE" | "SUBMITTING" | "SUCCESS">("IDLE");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -23,11 +24,13 @@ export default function CapturePage() {
 
   const loadProjects = async () => {
     try {
+      setError(null);
       const projs: any = await api("/api/v1/projects");
       setProjects(projs);
       if (projs.length > 0) setProjectId(projs[0].id);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setError("Failed to connect to the server. Please ensure the backend is running.");
     }
   };
 
@@ -100,6 +103,7 @@ export default function CapturePage() {
     
     setSubmitting(true);
     setSubmissionStatus("SUBMITTING");
+    setError(null);
 
     try {
       const formData = new FormData();
@@ -108,8 +112,6 @@ export default function CapturePage() {
       if (audioBlob) {
         formData.append("source_type", "AUDIO");
         formData.append("file", audioBlob, "recording.webm");
-        // We'll upload audio to capture/upload later or modify our endpoint.
-        // For Phase 3, we submit text first as primary.
       } else {
         formData.append("source_type", "TEXT");
         formData.append("raw_input", textInput);
@@ -142,9 +144,14 @@ export default function CapturePage() {
         });
       }
 
+      // Trigger AI Pipeline
+      await fetch(`${API_BASE}/api/v1/capture/${event.id}/process`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
       setSubmissionStatus("SUCCESS");
       
-      // Reset form after delay
       setTimeout(() => {
         setTextInput("");
         setAudioBlob(null);
@@ -154,30 +161,50 @@ export default function CapturePage() {
 
     } catch (err) {
       console.error(err);
-      alert("Submission failed");
+      setError("Submission failed. The AI pipeline or backend might be unreachable.");
       setSubmissionStatus("IDLE");
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (error && projects.length === 0) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-6 flex flex-col items-center justify-center text-center">
+          <ShieldAlert className="w-10 h-10 mb-3 opacity-80" />
+          <h2 className="text-lg font-semibold">Connection Error</h2>
+          <p className="text-sm mt-1">{error}</p>
+          <button onClick={loadProjects} className="btn btn-outline mt-4">Try Again</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-8">
-        <h2 className="text-3xl font-light tracking-tight">Tell us what happened.</h2>
-        <p className="text-white/50 mt-2">Update the field progress, report issues, or upload evidence.</p>
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground">Tell us what happened.</h2>
+        <p className="text-sm text-muted-foreground mt-2">Update the field progress, report issues, or upload evidence.</p>
       </div>
 
-      <div className="bg-black/40 border border-white/10 rounded-xl overflow-hidden shadow-2xl">
-        <div className="p-6 space-y-6">
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-4 flex items-center gap-3 text-sm">
+          <ShieldAlert className="w-5 h-5 shrink-0" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      <div className="bg-card border border-border rounded-xl shadow-sm flex flex-col">
+        <div className="p-8 space-y-6 flex-1">
           
           {/* Project Selector */}
-          <div>
-            <label className="text-sm font-medium text-white/70 mb-1 block">Project</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-foreground">Project</label>
             <select 
               value={projectId} 
               onChange={e => setProjectId(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-white/30"
+              className="input cursor-pointer"
             >
               {projects.map(p => (
                 <option key={p.id} value={p.id}>{p.name} ({p.code})</option>
@@ -188,46 +215,46 @@ export default function CapturePage() {
           {/* Text/Audio Input */}
           <div className="relative">
             {isRecording ? (
-              <div className="h-32 bg-red-500/10 border border-red-500/30 rounded-lg flex flex-col items-center justify-center animate-pulse">
-                <div className="flex items-center space-x-3 text-red-400">
-                  <Mic className="w-6 h-6 animate-bounce" />
-                  <span className="text-xl font-mono">{formatTime(recordingTime)}</span>
+              <div className="h-36 bg-destructive/10 border border-destructive/30 rounded-lg flex flex-col items-center justify-center animate-pulse shadow-inner">
+                <div className="flex items-center space-x-3 text-destructive">
+                  <Mic className="w-8 h-8 animate-bounce" />
+                  <span className="text-2xl font-mono tracking-wider font-semibold">{formatTime(recordingTime)}</span>
                 </div>
                 <button 
                   onClick={stopRecording}
-                  className="mt-4 flex items-center space-x-2 text-white/70 hover:text-white transition-colors"
+                  className="mt-4 flex items-center space-x-2 text-destructive/80 hover:text-destructive font-medium transition-colors bg-white/50 px-4 py-1.5 rounded-full"
                 >
-                  <StopCircle className="w-5 h-5" />
+                  <StopCircle className="w-4 h-4" />
                   <span>Stop Recording</span>
                 </button>
               </div>
             ) : audioBlob ? (
-              <div className="h-32 bg-white/5 border border-white/10 rounded-lg flex flex-col items-center justify-center relative">
+              <div className="h-36 bg-muted/50 border border-border rounded-lg flex flex-col items-center justify-center relative">
                 <button 
                   onClick={() => setAudioBlob(null)}
-                  className="absolute top-2 right-2 p-1 text-white/50 hover:text-white rounded-full hover:bg-white/10"
+                  className="absolute top-3 right-3 p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
-                <audio src={URL.createObjectURL(audioBlob)} controls className="mt-2" />
-                <span className="text-sm text-white/50 mt-2">Audio ready for processing</span>
+                <audio src={URL.createObjectURL(audioBlob)} controls className="mt-2 w-3/4 max-w-sm" />
+                <span className="text-sm font-medium text-muted-foreground mt-4">Audio ready for processing</span>
               </div>
             ) : (
               <textarea
                 value={textInput}
                 onChange={e => setTextInput(e.target.value)}
                 placeholder="Describe the update (e.g. 'Line 24 pipe spool erection completed around 3 PM')"
-                className="w-full h-32 bg-white/5 border border-white/10 rounded-lg p-4 text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 resize-none"
+                className="input h-36 resize-none p-4 text-base"
               />
             )}
 
             {!isRecording && !audioBlob && (
               <button 
                 onClick={startRecording}
-                className="absolute bottom-4 right-4 p-2 bg-black/50 hover:bg-black text-white/50 hover:text-white border border-white/10 rounded-full transition-all flex items-center group"
+                className="absolute bottom-4 right-4 p-3 bg-muted hover:bg-muted/80 text-muted-foreground hover:text-primary border border-border rounded-full transition-all flex items-center group shadow-sm"
                 title="Hold to Record"
               >
-                <Mic className="w-5 h-5 group-hover:text-red-400 transition-colors" />
+                <Mic className="w-5 h-5 group-hover:text-destructive transition-colors" />
               </button>
             )}
           </div>
@@ -237,7 +264,7 @@ export default function CapturePage() {
             <div 
               onDragOver={e => e.preventDefault()}
               onDrop={handleFileDrop}
-              className="border-2 border-dashed border-white/10 rounded-lg p-6 text-center hover:bg-white/[0.02] transition-colors relative"
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-muted/50 transition-colors relative"
             >
               <input 
                 type="file" 
@@ -245,20 +272,21 @@ export default function CapturePage() {
                 onChange={handleFileSelect}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <UploadCloud className="w-6 h-6 text-white/40 mx-auto mb-2" />
-              <p className="text-sm text-white/60">Drag & drop evidence (photos, docs) or click to browse</p>
+              <UploadCloud className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-medium text-foreground">Drag & drop evidence</p>
+              <p className="text-xs text-muted-foreground mt-1">Photos or documents, or click to browse</p>
             </div>
 
             {/* Evidence Preview List */}
             {evidenceFiles.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-3">
                 {evidenceFiles.map((f, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 bg-white/5 border border-white/10 rounded-md">
+                  <div key={i} className="flex items-center justify-between p-2.5 bg-muted border border-border rounded-md group shadow-sm">
                     <div className="flex items-center space-x-2 truncate pr-2">
-                      <ImageIcon className="w-4 h-4 text-white/50 shrink-0" />
-                      <span className="text-xs text-white/80 truncate">{f.name}</span>
+                      <ImageIcon className="w-4 h-4 text-primary shrink-0" />
+                      <span className="text-xs font-medium text-foreground truncate">{f.name}</span>
                     </div>
-                    <button onClick={() => removeFile(i)} className="text-white/40 hover:text-white shrink-0">
+                    <button onClick={() => removeFile(i)} className="text-muted-foreground hover:text-destructive shrink-0 transition-colors opacity-0 group-hover:opacity-100">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -270,28 +298,28 @@ export default function CapturePage() {
         </div>
         
         {/* Footer Actions */}
-        <div className="bg-white/5 border-t border-white/10 p-4 flex items-center justify-between">
+        <div className="bg-muted/30 border-t border-border p-5 px-8 flex items-center justify-between">
           <div className="flex-1">
             {submissionStatus === "SUBMITTING" && (
-              <div className="flex items-center space-x-3 text-sm text-white/70">
-                <Loader2 className="w-4 h-4 animate-spin text-teal-400" />
-                <span>Input received. Processing...</span>
+              <div className="flex items-center space-x-3 text-sm font-medium text-primary">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Input received. Pipeline is extracting entities...</span>
               </div>
             )}
             {submissionStatus === "SUCCESS" && (
-              <div className="flex items-center space-x-3 text-sm text-teal-400">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Event submitted successfully!</span>
+              <div className="flex items-center space-x-3 text-sm font-medium text-success">
+                <CheckCircle2 className="w-5 h-5" />
+                <span>Event submitted successfully! Added to governance queue.</span>
               </div>
             )}
           </div>
           <button
             onClick={handleSubmit}
             disabled={submitting || (!textInput && !audioBlob)}
-            className="flex items-center space-x-2 bg-white text-black px-6 py-2.5 rounded-md font-medium hover:bg-white/90 disabled:opacity-50 transition-colors"
+            className="btn btn-primary shadow-sm gap-2 disabled:opacity-50"
           >
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            <span>Submit Update</span>
+            Submit Update
           </button>
         </div>
       </div>
