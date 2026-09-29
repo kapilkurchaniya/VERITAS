@@ -35,6 +35,7 @@ class ExecutionEventResponse(ExecutionEventBase):
     extracted_data: Optional[Any] = None
     normalized_text: Optional[str] = None
     matched_activity_id: Optional[uuid.UUID] = None
+    matched_activity: Optional[Any] = None
     created_at: datetime
     updated_at: datetime
     
