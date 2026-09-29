@@ -2,17 +2,39 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Hexagon, Eye, EyeOff, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, ShieldCheck, ChevronDown, UserSquare2, Loader2, AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading, error } = useAuthStore();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const { login, error } = useAuthStore();
+  const [role, setRole] = useState<'admin' | 'planner' | 'supervisor'>('admin');
   const [submitting, setSubmitting] = useState(false);
+
+  // Map roles to dev credentials
+  const getEmailForRole = (r: string) => {
+    if (r === 'admin') return 'admin@nexus.dev';
+    if (r === 'planner') return 'planner@nexus.dev';
+    if (r === 'supervisor') return 'supervisor@nexus.dev';
+    return '';
+  };
+
+  const getPasswordForRole = (r: string) => {
+    if (r === 'admin') return 'admin123';
+    if (r === 'planner') return 'planner123';
+    if (r === 'supervisor') return 'supervisor123';
+    return '';
+  };
+
+  const [email, setEmail] = useState(getEmailForRole('admin'));
+  const [password, setPassword] = useState(getPasswordForRole('admin'));
+
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRole = e.target.value as 'admin' | 'planner' | 'supervisor';
+    setRole(newRole);
+    setEmail(getEmailForRole(newRole));
+    setPassword(getPasswordForRole(newRole));
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,196 +47,151 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "var(--bg-primary)" }}
-    >
-      {/* Subtle grid background */}
-      <div
-        className="fixed inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(var(--text-muted) 1px, transparent 1px),
-            linear-gradient(90deg, var(--text-muted) 1px, transparent 1px)`,
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="relative w-full max-w-[400px]"
-      >
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ background: "var(--accent-muted)", border: "1px solid var(--accent-border)" }}
-          >
-            <Hexagon size={22} style={{ color: "var(--accent)" }} />
+    <div className="min-h-screen bg-background font-['IBM_Plex_Sans'] text-foreground flex flex-col items-center justify-center p-8">
+      <div className="w-[420px] flex flex-col gap-6">
+        
+        {/* Main Card */}
+        <div className="bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
+          
+          {/* Header */}
+          <div className="p-8 pb-6 flex flex-col gap-4 text-center border-b border-border">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-sm font-semibold tracking-[0.28em] text-foreground">VERITAS</span>
+              <span className="w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                <CheckCircle2 className="w-3 h-3 text-white stroke-[3]" />
+              </span>
+            </div>
+            
+            <div className="flex flex-col gap-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Sign in to VERITAS</h1>
+              <p className="text-sm text-muted-foreground">Verified execution data for Northline Civic Center.</p>
+            </div>
           </div>
-          <div>
-            <h1
-              className="text-xl font-bold tracking-tight"
-              style={{ color: "var(--text-primary)" }}
-            >
-              NEXUS
-            </h1>
-            <p
-              className="text-[11px] font-medium tracking-widest uppercase"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Execution Intelligence
-            </p>
-          </div>
-        </div>
 
-        {/* Card */}
-        <div
-          className="rounded-xl p-8"
-          style={{
-            background: "var(--bg-secondary)",
-            border: "1px solid var(--border-strong)",
-          }}
-        >
-          <h2
-            className="text-lg font-semibold mb-1"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Sign in
-          </h2>
-          <p
-            className="text-sm mb-6"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Enter your credentials to access the platform
-          </p>
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-5">
+            
+            {/* Project Selector */}
+            <div className="flex flex-col gap-2">
+              <label htmlFor="project" className="text-sm font-medium text-foreground">Project or organization</label>
+              <div className="relative">
+                <select id="project" className="input cursor-pointer appearance-none pr-10" defaultValue="northline">
+                  <option value="northline">Northline Civic Center</option>
+                  <option value="southline">Southline Medical Hub</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-xs font-medium mb-1.5"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                Email
+            {/* Role Demo Selector */}
+            <div className="flex flex-col gap-2">
+              <label htmlFor="role" className="text-sm font-medium text-foreground flex items-center gap-2">
+                <UserSquare2 className="w-4 h-4" /> Sign in as (Dev Account)
               </label>
-              <input
-                id="email"
-                type="email"
+              <div className="relative">
+                <select 
+                  id="role" 
+                  value={role}
+                  onChange={handleRoleChange}
+                  className="input cursor-pointer appearance-none pr-10 border-primary/30 focus:border-primary bg-primary/5 text-primary font-medium"
+                >
+                  <option value="admin">System Admin</option>
+                  <option value="planner">Project Planner</option>
+                  <option value="supervisor">Field Supervisor</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary pointer-events-none" />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div className="flex flex-col gap-2">
+              <label htmlFor="email" className="text-sm font-medium text-foreground">Work email</label>
+              <input 
+                id="email" 
+                type="email" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@company.com"
+                className="input" 
                 required
-                autoComplete="email"
-                className="w-full h-10 px-3 rounded-lg text-sm outline-none transition-all duration-200"
-                style={{
-                  background: "var(--bg-tertiary)",
-                  border: "1px solid var(--border-strong)",
-                  color: "var(--text-primary)",
-                }}
               />
             </div>
 
             {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-medium mb-1.5"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  autoComplete="current-password"
-                  className="w-full h-10 px-3 pr-10 rounded-lg text-sm outline-none transition-all duration-200"
-                  style={{
-                    background: "var(--bg-tertiary)",
-                    border: "1px solid var(--border-strong)",
-                    color: "var(--text-primary)",
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer"
-                  style={{ color: "var(--text-muted)" }}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="password" className="text-sm font-medium text-foreground">Password</label>
+              <input 
+                id="password" 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input" 
+                required
+              />
+            </div>
+            
+            {error && (
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm bg-destructive/10 text-destructive border border-destructive/20 mt-1">
+                <AlertCircle size={14} />
+                {error}
               </div>
+            )}
+
+            {/* Keep Signed In */}
+            <div className="flex items-center gap-2 mt-1">
+              <input 
+                type="checkbox" 
+                id="keep-signed-in" 
+                defaultChecked 
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary" 
+              />
+              <label htmlFor="keep-signed-in" className="text-sm text-muted-foreground cursor-pointer">
+                Keep me signed in
+              </label>
             </div>
 
-            {/* Error */}
-            <AnimatePresence>
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm"
-                  style={{
-                    background: "rgba(239, 68, 68, 0.1)",
-                    border: "1px solid rgba(239, 68, 68, 0.2)",
-                    color: "var(--danger)",
-                  }}
-                >
-                  <AlertCircle size={14} />
-                  {error}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={submitting || !email || !password}
-              className="w-full h-10 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                background: "var(--accent)",
-                color: "var(--text-inverse)",
-              }}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </button>
+            {/* Actions */}
+            <div className="flex flex-col gap-3 mt-2">
+              <button 
+                type="submit" 
+                disabled={submitting || !email || !password}
+                className="btn btn-primary w-full shadow-sm text-sm py-2.5 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Signing in...
+                  </>
+                ) : "Sign in"}
+              </button>
+              
+              <div className="flex flex-col items-center gap-2 mt-2">
+                <a href="#" className="text-sm font-medium text-primary hover:underline">
+                  Use company SSO
+                </a>
+                <a href="#" className="text-xs text-muted-foreground hover:underline">
+                  Need access? Contact your workspace admin
+                </a>
+              </div>
+            </div>
+            
           </form>
+
+          {/* Security Strip */}
+          <div className="bg-background/50 border-t border-border px-6 py-4 flex items-center justify-center gap-3">
+            <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
+            <div className="flex flex-col">
+              <span className="text-[13px] font-medium text-foreground">Secure project workspace</span>
+              <span className="text-[11px] text-muted-foreground">Encrypted access for authorized teams</span>
+            </div>
+          </div>
+
         </div>
 
-        {/* Dev credentials hint */}
-        <div
-          className="mt-4 rounded-lg p-4 text-xs"
-          style={{
-            background: "var(--bg-secondary)",
-            border: "1px solid var(--border-subtle)",
-            color: "var(--text-muted)",
-          }}
-        >
-          <p className="font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-            Dev Credentials
-          </p>
-          <div className="space-y-1 font-mono">
-            <p>admin@nexus.dev / admin123</p>
-            <p>planner@nexus.dev / planner123</p>
-            <p>supervisor@nexus.dev / supervisor123</p>
-          </div>
-        </div>
-      </motion.div>
+        {/* Footer */}
+        <p className="text-center text-xs text-muted-foreground">
+          Environment: Production Backend
+        </p>
+
+      </div>
     </div>
   );
 }
