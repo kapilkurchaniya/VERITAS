@@ -13,14 +13,14 @@ interface ApiOptions {
 }
 
 interface ApiError {
-  detail: string;
+  detail: any;
 }
 
 export class ApiClientError extends Error {
   status: number;
-  detail: string;
-  constructor(status: number, detail: string) {
-    super(detail);
+  detail: any;
+  constructor(status: number, detail: any) {
+    super(typeof detail === "string" ? detail : JSON.stringify(detail));
     this.status = status;
     this.detail = detail;
   }
@@ -46,17 +46,22 @@ export async function api<T = unknown>(
     }
   }
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    method,
-    headers: fetchHeaders,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}${endpoint}`, {
+      method,
+      headers: fetchHeaders,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (error) {
+    throw new ApiClientError(0, "Network error: Failed to connect to the server.");
+  }
 
   if (!res.ok) {
-    let detail = "An error occurred";
+    let detail: any = "An error occurred";
     try {
-      const err: ApiError = await res.json();
-      detail = err.detail || detail;
+      const err: any = await res.json();
+      detail = err.detail || err.message || detail;
     } catch {
       // ignore parse error
     }

@@ -33,6 +33,7 @@ export default function GovernancePage() {
   };
 
   const loadQueue = async () => {
+    if (!projectId) return;
     try {
       setLoading(true);
       const data: any = await api(`/api/v1/governance/queue?project_id=${projectId}`);
@@ -47,10 +48,10 @@ export default function GovernancePage() {
   const handleApprove = async (eventId: string, overrideId?: string) => {
     try {
       setProcessingId(eventId);
-      const body = overrideId ? { override_activity_id: overrideId } : {};
+      const body = overrideId ? { override_activity_id: overrideId } : { override_activity_id: null };
       await api(`/api/v1/governance/${eventId}/approve`, {
         method: "POST",
-        body: JSON.stringify(body),
+        body,
       });
       setQueue(prev => prev.filter(e => e.id !== eventId));
     } catch (err) {
