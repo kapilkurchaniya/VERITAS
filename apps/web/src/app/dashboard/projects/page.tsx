@@ -102,7 +102,7 @@ export default function ProjectsPage() {
                 </div>
               </div>
               
-              <Link href={`/dashboard?project=${project.id}`} className="w-full mt-auto flex items-center justify-center gap-2 bg-secondary text-secondary-foreground border border-border px-4 py-2.5 rounded-md text-sm font-medium hover:bg-muted transition-colors">
+              <Link href={`/dashboard/projects/${project.id}`} className="w-full mt-auto flex items-center justify-center gap-2 bg-secondary text-secondary-foreground border border-border px-4 py-2.5 rounded-md text-sm font-medium hover:bg-muted transition-colors">
                 View Workspace
                 <ChevronRight className="w-4 h-4" />
               </Link>
