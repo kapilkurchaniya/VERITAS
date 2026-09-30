@@ -1,21 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { api } from "@/lib/api";
-import { UploadCloud, FileSpreadsheet, Loader2 } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, Loader2, CheckCircle2 } from "lucide-react";
 
-export default function SchedulePage({ params }: { params: { id: string } }) {
+export default function SchedulePage() {
+  const params = useParams<{ id: string }>();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [versions, setVersions] = useState<any[]>([]);
   const [schedules, setSchedules] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadSchedules();
+    if (params.id) loadSchedules();
   }, [params.id]);
 
   const loadSchedules = async () => {
     try {
+      setLoading(true);
       const scheds: any = await api(`/api/v1/schedules/project/${params.id}`);
       setSchedules(scheds);
       if (scheds.length > 0) {
@@ -24,6 +28,8 @@ export default function SchedulePage({ params }: { params: { id: string } }) {
       }
     } catch (err) {
       console.error("Failed to load schedules", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,7 +48,6 @@ export default function SchedulePage({ params }: { params: { id: string } }) {
       formData.append("project_id", params.id);
       formData.append("file", file);
 
-      // Using raw fetch since our api wrapper doesn't handle FormData perfectly yet
       const token = localStorage.getItem("nexus_token");
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
       
@@ -67,20 +72,20 @@ export default function SchedulePage({ params }: { params: { id: string } }) {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 max-w-5xl animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Schedule Management</h2>
-          <p className="text-white/50 text-sm mt-1">Import and manage master schedule versions.</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">Schedule Management</h2>
+          <p className="text-muted-foreground text-sm mt-1">Import and manage master schedule versions.</p>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-1">
-          <div className="border border-white/10 bg-black/20 rounded-lg p-6">
-            <h3 className="font-medium mb-4">Import New Schedule</h3>
+          <div className="border border-border bg-card rounded-xl p-6 shadow-sm">
+            <h3 className="font-medium text-foreground mb-4">Import New Schedule</h3>
             
-            <div className="border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:bg-white/5 transition-colors cursor-pointer relative">
+            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:bg-muted/50 transition-colors cursor-pointer relative">
               <input 
                 type="file" 
                 accept=".csv,.xlsx"
@@ -88,16 +93,17 @@ export default function SchedulePage({ params }: { params: { id: string } }) {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 disabled={uploading}
               />
-              <UploadCloud className="w-8 h-8 text-white/50 mx-auto mb-3" />
-              <p className="text-sm text-white/70">
-                {file ? file.name : "Drag & drop CSV/XLSX or click to browse"}
+              <UploadCloud className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-medium text-foreground">
+                {file ? file.name : "Drag & drop CSV/XLSX"}
               </p>
+              <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
             </div>
 
             <button
               onClick={handleUpload}
               disabled={!file || uploading}
-              className="mt-4 w-full flex items-center justify-center space-x-2 bg-white text-black px-4 py-2 rounded font-medium hover:bg-white/90 disabled:opacity-50 transition-colors"
+              className="mt-4 w-full btn btn-primary gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
               <span>{uploading ? "Importing..." : "Process Schedule"}</span>
@@ -106,37 +112,43 @@ export default function SchedulePage({ params }: { params: { id: string } }) {
         </div>
 
         <div className="md:col-span-2">
-          <div className="border border-white/10 bg-black/20 rounded-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-white/10 bg-white/5">
-              <h3 className="font-medium">Version History</h3>
+          <div className="border border-border bg-card rounded-xl overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-border bg-muted">
+              <h3 className="font-medium text-foreground text-sm uppercase tracking-wider">Version History</h3>
             </div>
             
-            {versions.length === 0 ? (
-              <div className="p-12 text-center text-white/50">
-                No schedule versions found. Import one to begin.
+            {loading ? (
+              <div className="p-12 flex justify-center">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              </div>
+            ) : versions.length === 0 ? (
+              <div className="p-12 text-center">
+                <FileSpreadsheet className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+                <p className="text-sm font-medium text-foreground">No schedule versions found</p>
+                <p className="text-xs text-muted-foreground mt-1">Import one to begin.</p>
               </div>
             ) : (
-              <div className="divide-y divide-white/10">
+              <div className="divide-y divide-border">
                 {versions.map((v: any) => (
-                  <div key={v.id} className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors">
+                  <div key={v.id} className="p-6 flex items-center justify-between hover:bg-muted/50 transition-colors">
                     <div>
                       <div className="flex items-center space-x-3">
-                        <span className="font-medium text-lg">Version {v.version_num}</span>
+                        <span className="font-semibold text-lg text-foreground">Version {v.version_num}</span>
                         {v.status === "ACTIVE" && (
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-teal-500/20 text-teal-400 border border-teal-500/30">
-                            Active
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Active
                           </span>
                         )}
                         {v.status === "ARCHIVED" && (
-                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-white/10 text-white/50 border border-white/20">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-muted text-muted-foreground border border-border">
                             Archived
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-white/50 mt-1">Source: {v.source_file_name}</p>
+                      <p className="text-xs text-muted-foreground mt-1 font-medium">Source: {v.source_file_name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-white/50">{new Date(v.created_at).toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground font-medium">{new Date(v.created_at).toLocaleString()}</p>
                     </div>
                   </div>
                 ))}
