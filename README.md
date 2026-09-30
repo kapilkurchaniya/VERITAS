@@ -1,4 +1,4 @@
- # NEXUS — Project Execution Intelligence Platform
+  # NEXUS — Project Execution Intelligence Platform
 
 AI-powered platform that transforms unstructured field updates into validated, traceable, schedule-linked project actuals.
 
