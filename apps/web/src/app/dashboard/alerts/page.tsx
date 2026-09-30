@@ -9,6 +9,7 @@ export default function AlertsPage() {
   const [projectId, setProjectId] = useState("");
   const [variances, setVariances] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadProjects();
@@ -20,14 +21,18 @@ export default function AlertsPage() {
 
   const loadProjects = async () => {
     try {
+      setError(null);
       const projs: any = await api("/api/v1/projects");
       setProjects(projs);
       if (projs.length > 0) setProjectId(projs[0].id);
-    } catch {}
+    } catch (err: any) {
+      setError(err.message || "Failed to load projects. Ensure the backend is running.");
+    }
   };
 
   const loadAlerts = async () => {
     setLoading(true);
+    setError(null);
     try {
       // Show only WARNING and CRITICAL variances as alerts
       const [warns, crits]: any = await Promise.all([
@@ -35,7 +40,9 @@ export default function AlertsPage() {
         api(`/api/v1/governance/variances?project_id=${projectId}&severity=CRITICAL`),
       ]);
       setVariances([...crits, ...warns]);
-    } catch {}
+    } catch (err: any) {
+      setError(err.message || "Failed to load alerts.");
+    }
     setLoading(false);
   };
 
@@ -69,7 +76,14 @@ export default function AlertsPage() {
         </select>
       </div>
 
-      {loading ? (
+      {error ? (
+        <div className="border border-destructive/20 bg-destructive/5 rounded-xl p-8 text-center shadow-sm flex flex-col items-center justify-center">
+          <ShieldAlert className="w-10 h-10 text-destructive/50 mb-3" />
+          <h3 className="text-lg font-medium text-foreground">Failed to load alerts</h3>
+          <p className="text-sm mt-1 text-muted-foreground">{error}</p>
+          <button onClick={loadAlerts} className="btn btn-outline mt-4 shadow-sm">Try Again</button>
+        </div>
+      ) : loading ? (
         <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>
       ) : variances.length === 0 ? (
         <div className="border border-border bg-card rounded-xl p-16 text-center shadow-sm">
