@@ -10,6 +10,7 @@ export default function EventsPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     loadProjects();
@@ -115,6 +116,8 @@ export default function EventsPage() {
           <input 
             type="text" 
             placeholder="Search raw text, normalized text..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="input pl-10"
           />
         </div>
@@ -125,7 +128,13 @@ export default function EventsPage() {
           <div className="p-12 flex justify-center">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-        ) : events.length === 0 ? (
+        ) : (() => {
+          const filtered = events.filter((evt: any) => {
+            if (!searchTerm) return true;
+            const term = searchTerm.toLowerCase();
+            return (evt.raw_input?.toLowerCase().includes(term)) || (evt.normalized_text?.toLowerCase().includes(term));
+          });
+          return filtered.length === 0 ? (
           <div className="p-16 text-center text-muted-foreground flex flex-col items-center justify-center">
             <FileText className="w-12 h-12 mb-4 opacity-50" />
             <p className="text-lg font-medium text-foreground">No events found.</p>
@@ -144,7 +153,7 @@ export default function EventsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {events.map((evt) => (
+                {filtered.map((evt: any) => (
                   <tr key={evt.id} className="hover:bg-muted/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex flex-col items-center justify-center w-10 h-10 rounded-full bg-muted border border-border group-hover:bg-background transition-colors">
@@ -187,7 +196,8 @@ export default function EventsPage() {
               </tbody>
             </table>
           </div>
-        )}
+        );
+        })()}
       </div>
     </div>
   );
