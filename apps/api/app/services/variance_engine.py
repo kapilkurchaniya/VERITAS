@@ -26,10 +26,13 @@ class VarianceEngine:
 
     async def compute(self, session: AsyncSession, event_id: uuid.UUID) -> List[Variance]:
         """Entry point: compute all applicable variances for an approved event."""
-        event = await session.get(
-            ExecutionEvent, event_id,
-            options=[selectinload(ExecutionEvent.matched_activity)]
+        stmt = (
+            select(ExecutionEvent)
+            .where(ExecutionEvent.id == event_id)
+            .options(selectinload(ExecutionEvent.matched_activity))
         )
+        result = await session.execute(stmt)
+        event = result.scalar_one_or_none()
         if not event or event.status != EventStatus.APPROVED or not event.matched_activity:
             return []
 

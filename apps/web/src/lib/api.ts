@@ -54,6 +54,7 @@ export async function api<T = unknown>(
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch (error) {
+    console.error("Fetch failed with error:", error);
     throw new ApiClientError(0, "Network error: Failed to connect to the server.");
   }
 
