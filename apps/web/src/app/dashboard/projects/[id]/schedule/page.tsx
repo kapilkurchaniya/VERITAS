@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/lib/api";
-import { UploadCloud, FileSpreadsheet, Loader2, CheckCircle2 } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, Loader2, CheckCircle2, FolderKanban, ListTree } from "lucide-react";
 
 export default function SchedulePage() {
   const params = useParams<{ id: string }>();
@@ -78,6 +79,31 @@ export default function SchedulePage() {
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">Schedule Management</h2>
           <p className="text-muted-foreground text-sm mt-1">Import and manage master schedule versions.</p>
         </div>
+      </div>
+
+      {/* Sub-Navigation */}
+      <div className="flex items-center gap-3 border-b border-border pb-4">
+        <Link
+          href={`/dashboard/projects/${params.id}`}
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-transparent"
+        >
+          <FolderKanban className="w-4 h-4" />
+          Overview
+        </Link>
+        <Link
+          href={`/dashboard/projects/${params.id}/activities`}
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-transparent"
+        >
+          <ListTree className="w-4 h-4" />
+          Activities
+        </Link>
+        <Link
+          href={`/dashboard/projects/${params.id}/schedule`}
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-primary/10 text-primary border border-primary/20"
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          Schedule & Import
+        </Link>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
