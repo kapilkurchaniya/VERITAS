@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ShieldCheck, ChevronDown, UserSquare2, Loader2, AlertCircle } from "lucide-react";
 import { useAuthStore } from "@/lib/auth-store";
@@ -64,24 +64,12 @@ export default function LoginPage() {
             
             <div className="flex flex-col gap-2">
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">Sign in to VERITAS</h1>
-              <p className="text-sm text-muted-foreground">Verified execution data for Northline Civic Center.</p>
+              <p className="text-sm text-muted-foreground">Verified execution intelligence platform.</p>
             </div>
           </div>
 
           {/* Form Content */}
           <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-5">
-            
-            {/* Project Selector */}
-            <div className="flex flex-col gap-2">
-              <label htmlFor="project" className="text-sm font-medium text-foreground">Project or organization</label>
-              <div className="relative">
-                <select id="project" className="input cursor-pointer appearance-none pr-10" defaultValue="northline">
-                  <option value="northline">Northline Civic Center</option>
-                  <option value="southline">Southline Medical Hub</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-              </div>
-            </div>
 
             {/* Role Demo Selector */}
             <div className="flex flex-col gap-2">
@@ -164,12 +152,9 @@ export default function LoginPage() {
               </button>
               
               <div className="flex flex-col items-center gap-2 mt-2">
-                <a href="#" className="text-sm font-medium text-primary hover:underline">
-                  Use company SSO
-                </a>
-                <a href="#" className="text-xs text-muted-foreground hover:underline">
-                  Need access? Contact your workspace admin
-                </a>
+                <span className="text-xs text-muted-foreground">
+                  SSO and external authentication coming soon
+                </span>
               </div>
             </div>
             
