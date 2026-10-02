@@ -1,9 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 @source "../../";
 
 @theme {
   --font-sans: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
   --color-background: #faf9f7;
   --color-foreground: #111827;
@@ -15,6 +17,9 @@
   --color-primary-hover: #0d9488;
   --color-primary-foreground: #ffffff;
   
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #334155;
+
   --color-muted: #f3f4f6;
   --color-muted-foreground: #6b7280;
   
@@ -23,8 +28,36 @@
   --color-ring: #0f766e;
   
   --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
   --color-warning: #f59e0b;
   --color-success: #10b981;
+
+  --color-overlay: rgba(0, 0, 0, 0.4);
+}
+
+/* ── Dark Mode ─────────────────────────────────────── */
+.dark {
+  --color-background: #0f1117;
+  --color-foreground: #f1f5f9;
+  --color-card: #1a1d27;
+  --color-card-foreground: #f1f5f9;
+  --color-sidebar: #14161e;
+
+  --color-primary: #14b8a6;
+  --color-primary-hover: #2dd4bf;
+  --color-primary-foreground: #0f1117;
+
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #cbd5e1;
+
+  --color-muted: #1e2230;
+  --color-muted-foreground: #94a3b8;
+
+  --color-border: #2d3348;
+  --color-input: #2d3348;
+  --color-ring: #14b8a6;
+
+  --color-overlay: rgba(0, 0, 0, 0.6);
 }
 
 @layer base {
@@ -49,9 +82,48 @@
   .btn-ghost {
     @apply bg-transparent text-foreground hover:bg-muted;
   }
+  .btn-destructive {
+    @apply bg-destructive text-destructive-foreground hover:bg-destructive/90;
+  }
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground border border-border hover:bg-muted;
+  }
   
   /* inputs */
   .input {
     @apply flex h-9 w-full rounded-md border border-border bg-card px-3 py-2 text-sm outline-none transition-colors focus:border-primary;
+  }
+
+  /* Slide-over drawer overlay */
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background-color: var(--color-overlay);
+    backdrop-filter: blur(2px);
+  }
+
+  /* Slide-over drawer panel */
+  .drawer-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 51;
+    width: 100%;
+    max-width: 520px;
+    background-color: var(--color-card);
+    border-left: 1px solid var(--color-border);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+  }
+
+  .drawer-panel-wide {
+    max-width: 640px;
+  }
+
+  /* Badge / Chip */
+  .chip {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border;
   }
 }
