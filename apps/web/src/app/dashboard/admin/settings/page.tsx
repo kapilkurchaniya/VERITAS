@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Settings, Save, Bell, Shield, Key, Mail, Monitor, CheckCircle2 } from "lucide-react";
+import { useThemeStore } from "@/lib/theme-store";
 
 type SettingsTab = "general" | "security" | "notifications" | "api";
 
@@ -10,9 +11,27 @@ export default function AdminSettingsPage() {
   const [saved, setSaved] = useState(false);
   const [platformName, setPlatformName] = useState("VERITAS");
   const [supportEmail, setSupportEmail] = useState("support@nexus.dev");
-  const [darkMode, setDarkMode] = useState(false);
+  const { isDark, toggle: toggleTheme, initialize: initTheme } = useThemeStore();
+
+  useEffect(() => {
+    initTheme();
+    // Load saved settings from localStorage
+    const savedSettings = localStorage.getItem("veritas_settings");
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed.platformName) setPlatformName(parsed.platformName);
+        if (parsed.supportEmail) setSupportEmail(parsed.supportEmail);
+      } catch {}
+    }
+  }, [initTheme]);
 
   const handleSave = () => {
+    // Persist settings to localStorage (backend settings endpoint can be added later)
+    localStorage.setItem("veritas_settings", JSON.stringify({
+      platformName,
+      supportEmail,
+    }));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -117,8 +136,8 @@ export default function AdminSettingsPage() {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={darkMode}
-                        onChange={(e) => setDarkMode(e.target.checked)}
+                        checked={isDark}
+                        onChange={() => toggleTheme()}
                         className="sr-only peer"
                       />
                       <div className="w-9 h-5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
