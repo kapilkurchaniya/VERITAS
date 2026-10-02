@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { api } from "@/lib/api";
+import { api, ApiClientError } from "@/lib/api";
 import { FolderKanban, Loader2, MapPin, Users, Plus, Calendar, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { SlideDrawer } from "@/app/components/SlideDrawer";
 
 interface ProjectItem {
   id: string;
@@ -19,6 +20,15 @@ interface ProjectItem {
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  // Form state
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
 
   useEffect(() => {
     loadProjects();
@@ -36,6 +46,31 @@ export default function ProjectsPage() {
     }
   }
 
+  const handleCreateProject = async () => {
+    if (!name.trim() || !code.trim()) return;
+    setCreating(true);
+    setCreateError(null);
+
+    try {
+      await api("/api/v1/projects", {
+        method: "POST",
+        body: { name: name.trim(), code: code.trim().toUpperCase(), description: description.trim() || null, location: location.trim() || null },
+      });
+      // Reset form
+      setName(""); setCode(""); setDescription(""); setLocation("");
+      setShowCreate(false);
+      await loadProjects();
+    } catch (err) {
+      if (err instanceof ApiClientError) {
+        setCreateError(typeof err.detail === "string" ? err.detail : "Failed to create project");
+      } else {
+        setCreateError("Failed to create project");
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between mb-8">
@@ -45,7 +80,10 @@ export default function ProjectsPage() {
             Manage your construction projects, view status, and access project workspaces.
           </p>
         </div>
-        <button className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm">
+        <button
+          onClick={() => setShowCreate(true)}
+          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm"
+        >
           <Plus className="w-4 h-4" />
           New Project
         </button>
@@ -60,6 +98,13 @@ export default function ProjectsPage() {
           <FolderKanban className="w-12 h-12 mb-4 opacity-50" />
           <p className="text-lg font-medium text-foreground">No projects found.</p>
           <p className="text-sm mt-1">Create a new project to get started.</p>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="btn btn-primary mt-4"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create First Project
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -110,6 +155,77 @@ export default function ProjectsPage() {
           ))}
         </div>
       )}
+
+      {/* Create Project Drawer */}
+      <SlideDrawer
+        open={showCreate}
+        onClose={() => { setShowCreate(false); setCreateError(null); }}
+        title="Create New Project"
+        subtitle="Set up a new construction project workspace"
+        footer={
+          <div className="flex items-center justify-end gap-3">
+            <button onClick={() => setShowCreate(false)} className="btn btn-ghost">
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateProject}
+              disabled={creating || !name.trim() || !code.trim()}
+              className="btn btn-primary gap-2 disabled:opacity-50"
+            >
+              {creating && <Loader2 className="w-4 h-4 animate-spin" />}
+              Create Project
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-5">
+          {createError && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-3 text-sm">
+              {createError}
+            </div>
+          )}
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Project Name *</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. NH-47 Bypass Package 3"
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Project Code *</label>
+            <input
+              type="text"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="e.g. NH47"
+              className="input font-mono uppercase"
+            />
+            <p className="text-xs text-muted-foreground mt-1">Short unique identifier (auto-uppercased)</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief project description..."
+              className="input h-24 resize-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Location</label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Chennai, Tamil Nadu"
+              className="input"
+            />
+          </div>
+        </div>
+      </SlideDrawer>
     </div>
   );
 }

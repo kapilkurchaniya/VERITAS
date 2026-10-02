@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/lib/api";
-import { Loader2, FolderKanban, MapPin, Users, Calendar, Activity, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Loader2, FolderKanban, MapPin, Users, Calendar, Activity, Clock, CheckCircle2, AlertTriangle, ListTree, FileSpreadsheet, ChevronRight } from "lucide-react";
 
 interface ProjectDetail {
   id: string;
@@ -140,27 +141,54 @@ export default function ProjectOverviewPage() {
         </div>
       </div>
 
+      {/* Sub-Navigation Links */}
+      <div className="flex items-center gap-3 border-b border-border pb-4">
+        <Link
+          href={`/dashboard/projects/${params.id}`}
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-primary/10 text-primary border border-primary/20"
+        >
+          <FolderKanban className="w-4 h-4" />
+          Overview
+        </Link>
+        <Link
+          href={`/dashboard/projects/${params.id}/activities`}
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-transparent"
+        >
+          <ListTree className="w-4 h-4" />
+          Activities ({stats.totalActivities})
+        </Link>
+        <Link
+          href={`/dashboard/projects/${params.id}/schedule`}
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors border border-transparent"
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          Schedule & Import
+        </Link>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-card border border-border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+        <Link href={`/dashboard/projects/${params.id}/activities`} className="bg-card border border-border rounded-lg p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Activity className="w-5 h-5 text-primary" />
             </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
           </div>
           <p className="text-3xl font-semibold tracking-tight text-foreground">{stats.totalActivities}</p>
           <p className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-wider">Total Activities</p>
-        </div>
+        </Link>
 
-        <div className="bg-card border border-border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+        <Link href="/dashboard/governance" className="bg-card border border-border rounded-lg p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
               <Clock className="w-5 h-5 text-warning" />
             </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
           </div>
           <p className="text-3xl font-semibold tracking-tight text-foreground">{stats.pendingReviews}</p>
           <p className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-wider">Pending Reviews</p>
-        </div>
+        </Link>
 
         <div className="bg-card border border-border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center gap-3 mb-3">
@@ -172,15 +200,16 @@ export default function ProjectOverviewPage() {
           <p className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-wider">Verified Events</p>
         </div>
 
-        <div className="bg-card border border-border rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+        <Link href="/dashboard/variances" className="bg-card border border-border rounded-lg p-5 shadow-sm hover:shadow-md hover:border-primary/30 transition-all group">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-destructive" />
             </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto" />
           </div>
           <p className="text-3xl font-semibold tracking-tight text-foreground">{stats.criticalVariances}</p>
           <p className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-wider">Critical Variances</p>
-        </div>
+        </Link>
       </div>
     </div>
   );
