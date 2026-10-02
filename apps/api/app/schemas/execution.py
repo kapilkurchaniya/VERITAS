@@ -3,6 +3,7 @@ from typing import Optional, List, Any
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from app.models.execution import EventStatus, SourceType
+from app.schemas.schedule import ActivityResponse
 
 
 class EvidenceBase(BaseModel):
@@ -35,7 +36,7 @@ class ExecutionEventResponse(ExecutionEventBase):
     extracted_data: Optional[Any] = None
     normalized_text: Optional[str] = None
     matched_activity_id: Optional[uuid.UUID] = None
-    matched_activity: Optional[Any] = None
+    matched_activity: Optional[ActivityResponse] = None
     created_at: datetime
     updated_at: datetime
     
