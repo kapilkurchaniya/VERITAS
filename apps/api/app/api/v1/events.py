@@ -11,7 +11,7 @@ from app.models.user import User, RoleName
 from app.models.execution import ExecutionEvent, EventStatus
 from app.schemas.execution import ExecutionEventResponse
 
-router = APIRouter(prefix="/events", tags=["Events"])
+router = APIRouter(prefix="/execution-records", tags=["Events"])
 
 @router.get("", response_model=List[ExecutionEventResponse])
 async def list_events(

@@ -108,7 +108,7 @@ export default function DashboardPage() {
             deltaCount++;
           }
 
-          const events: any = await api(`/api/v1/events?project_id=${proj.id}&status=APPROVED`);
+          const events: any = await api(`/api/v1/execution-records?project_id=${proj.id}&status=APPROVED`);
           verifiedEvents += events.length;
         } catch {
           // Individual project stats may fail, continue
