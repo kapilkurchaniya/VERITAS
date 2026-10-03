@@ -35,7 +35,7 @@ export default function AuditPage() {
         const projs: any = await api("/api/v1/projects");
         for (const proj of projs) {
           try {
-            const events: any = await api(`/api/v1/events?project_id=${proj.id}`);
+            const events: any = await api(`/api/v1/execution-records?project_id=${proj.id}`);
             for (const evt of events) {
               logs.push({
                 id: evt.id,

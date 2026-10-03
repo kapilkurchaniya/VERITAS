@@ -38,7 +38,7 @@ export default function EventsPage() {
   async function loadEvents() {
     try {
       setLoading(true);
-      let endpoint = `/api/v1/events?project_id=${projectId}`;
+      let endpoint = `/api/v1/execution-records?project_id=${projectId}`;
       if (statusFilter !== "ALL") {
         endpoint += `&status=${statusFilter}`;
       }
