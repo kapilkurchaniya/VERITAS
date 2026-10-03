@@ -122,7 +122,7 @@ export default function AskPage() {
                 {msg.role === "user" ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
               </div>
               <div className={`max-w-[80%] flex flex-col gap-2 ${msg.role === "user" ? "items-end" : "items-start"}`}>
-                <div className={`p-4 rounded-2xl text-sm ${
+                <div className={`p-4 rounded-2xl text-sm whitespace-pre-wrap ${
                   msg.role === "user" 
                     ? "bg-primary text-primary-foreground rounded-tr-sm" 
                     : "bg-muted text-foreground border border-border rounded-tl-sm"
