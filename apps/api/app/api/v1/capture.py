@@ -4,6 +4,7 @@ import aiofiles
 from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.db.session import get_db
 from app.core.deps import require_roles
@@ -11,7 +12,7 @@ from app.models.user import User, RoleName
 from app.models.execution import ExecutionEvent, Evidence, SourceType, EventStatus
 from app.schemas.execution import ExecutionEventResponse, EvidenceResponse
 
-router = APIRouter(prefix="/capture", tags=["Capture"])
+router = APIRouter(prefix="/field-updates", tags=["Capture"])
 
 UPLOAD_DIR = "uploads"
 
@@ -39,8 +40,13 @@ async def submit_event(
     )
     db.add(event)
     await db.commit()
-    await db.refresh(event)
-    return event
+    
+    stmt = select(ExecutionEvent).where(ExecutionEvent.id == event.id).options(
+        selectinload(ExecutionEvent.evidence),
+        selectinload(ExecutionEvent.matched_activity)
+    )
+    result = await db.execute(stmt)
+    return result.scalars().first()
 
 @router.post("/upload", response_model=EvidenceResponse)
 async def upload_evidence(

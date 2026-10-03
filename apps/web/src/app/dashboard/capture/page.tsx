@@ -121,7 +121,7 @@ export default function CapturePage() {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
       // Submit event
-      const res = await fetch(`${API_BASE}/api/v1/capture`, {
+      const res = await fetch(`${API_BASE}/api/v1/field-updates`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -137,7 +137,7 @@ export default function CapturePage() {
         fileForm.append("event_id", event.id);
         fileForm.append("file", file);
         
-        await fetch(`${API_BASE}/api/v1/capture/upload`, {
+        await fetch(`${API_BASE}/api/v1/field-updates/upload`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` },
           body: fileForm,
@@ -145,7 +145,7 @@ export default function CapturePage() {
       }
 
       // Trigger AI Pipeline
-      await fetch(`${API_BASE}/api/v1/capture/${event.id}/process`, {
+      await fetch(`${API_BASE}/api/v1/field-updates/${event.id}/process`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       });
