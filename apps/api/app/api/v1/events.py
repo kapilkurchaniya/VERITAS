@@ -28,7 +28,10 @@ async def list_events(
     if status:
         stmt = stmt.where(ExecutionEvent.status == status)
         
-    stmt = stmt.options(selectinload(ExecutionEvent.evidence)).order_by(ExecutionEvent.created_at.desc())
+    stmt = stmt.options(
+        selectinload(ExecutionEvent.evidence),
+        selectinload(ExecutionEvent.matched_activity)
+    ).order_by(ExecutionEvent.created_at.desc())
     result = await db.execute(stmt)
     return result.scalars().all()
 
@@ -42,7 +45,10 @@ async def get_event(
     db: AsyncSession = Depends(get_db)
 ):
     """Get single execution event."""
-    stmt = select(ExecutionEvent).where(ExecutionEvent.id == event_id).options(selectinload(ExecutionEvent.evidence))
+    stmt = select(ExecutionEvent).where(ExecutionEvent.id == event_id).options(
+        selectinload(ExecutionEvent.evidence),
+        selectinload(ExecutionEvent.matched_activity)
+    )
     result = await db.execute(stmt)
     event = result.scalars().first()
     if not event:

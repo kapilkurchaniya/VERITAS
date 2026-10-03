@@ -89,7 +89,7 @@ export default function MemoryPage() {
         } catch {}
 
         try {
-          const events: any = await api(`/api/v1/events?project_id=${proj.id}&status=APPROVED`);
+          const events: any = await api(`/api/v1/execution-records?project_id=${proj.id}&status=APPROVED`);
           for (const evt of events.slice(0, 10)) {
             items.push({
               id: `evt-${evt.id}`,

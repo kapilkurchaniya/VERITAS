@@ -61,7 +61,7 @@ export default function GovernancePage() {
   const loadAllEvents = async () => {
     if (!projectId) return;
     try {
-      const data: any = await api(`/api/v1/events?project_id=${projectId}`);
+      const data: any = await api(`/api/v1/execution-records?project_id=${projectId}`);
       setAllEvents(data);
     } catch (err) {
       console.error(err);

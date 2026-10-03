@@ -52,7 +52,7 @@ export default function ProjectOverviewPage() {
       } catch {}
 
       try {
-        const events: any = await api(`/api/v1/events?project_id=${params.id}&status=APPROVED`);
+        const events: any = await api(`/api/v1/execution-records?project_id=${params.id}&status=APPROVED`);
         verifiedEvents = events.length;
       } catch {}
 
