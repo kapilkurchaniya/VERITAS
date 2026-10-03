@@ -85,7 +85,9 @@ async def upload_evidence(
     db.add(evidence)
     
     if event_id:
-        event = await db.get(ExecutionEvent, event_id)
+        stmt = select(ExecutionEvent).where(ExecutionEvent.id == event_id).options(selectinload(ExecutionEvent.evidence))
+        result = await db.execute(stmt)
+        event = result.scalars().first()
         if event:
             event.evidence.append(evidence)
             
