@@ -60,40 +60,46 @@ async def upload_evidence(
     Upload an evidence file.
     Optionally links it immediately to an event_id.
     """
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-    
-    file_id = uuid.uuid4()
-    extension = os.path.splitext(file.filename)[1]
-    safe_filename = f"{file_id}{extension}"
-    file_path = os.path.join(UPLOAD_DIR, safe_filename)
-    
-    # Save file
-    async with aiofiles.open(file_path, 'wb') as out_file:
-        content = await file.read()
-        await out_file.write(content)
-        file_size = len(content)
+    try:
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        
+        file_id = uuid.uuid4()
+        filename_safe = file.filename if file.filename else "unknown"
+        extension = os.path.splitext(filename_safe)[1]
+        safe_filename = f"{file_id}{extension}"
+        file_path = os.path.join(UPLOAD_DIR, safe_filename)
+        
+        # Save file
+        async with aiofiles.open(file_path, 'wb') as out_file:
+            content = await file.read()
+            await out_file.write(content)
+            file_size = len(content)
 
-    evidence = Evidence(
-        id=file_id,
-        project_id=project_id,
-        uploaded_by_id=current_user.id,
-        file_name=file.filename,
-        file_path=file_path,
-        file_type=file.content_type or "application/octet-stream",
-        file_size=file_size
-    )
-    db.add(evidence)
-    
-    if event_id:
-        stmt = select(ExecutionEvent).where(ExecutionEvent.id == event_id).options(selectinload(ExecutionEvent.evidence))
-        result = await db.execute(stmt)
-        event = result.scalars().first()
-        if event:
-            event.evidence.append(evidence)
-            
-    await db.commit()
-    await db.refresh(evidence)
-    return evidence
+        evidence = Evidence(
+            id=file_id,
+            project_id=project_id,
+            uploaded_by_id=current_user.id,
+            file_name=filename_safe,
+            file_path=file_path,
+            file_type=file.content_type or "application/octet-stream",
+            file_size=file_size
+        )
+        db.add(evidence)
+        
+        if event_id:
+            stmt = select(ExecutionEvent).where(ExecutionEvent.id == event_id).options(selectinload(ExecutionEvent.evidence))
+            result = await db.execute(stmt)
+            event = result.scalars().first()
+            if event:
+                event.evidence.append(evidence)
+                
+        await db.commit()
+        await db.refresh(evidence)
+        return evidence
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 from fastapi import BackgroundTasks
 from app.services.pipeline import PipelineOrchestrator
